@@ -3,6 +3,13 @@
     <Runtime>
         <Import assembly = "Kusto.Data.dll"/>
         <Import assembly = "Microsoft.Identity.Client.dll"/>
+        <Import assembly = "Kusto.Cloud.Platform.dll"/>
+        <Import assembly = "Kusto.Cloud.Platform.Aad.dll"/>
+
+        <ScanExclude  path="Kusto.Data.dll" />
+        <ScanExclude  path="Microsoft.Identity.Client.dll" />
+        <ScanExclude  path="Kusto.Cloud.Platform.dll" />
+        <ScanExclude  path="Kusto.Cloud.Platform.Aad.dll" />
     </Runtime>
 
     <Extension path="/MonoDevelop/Ide/StartupHandlers">
