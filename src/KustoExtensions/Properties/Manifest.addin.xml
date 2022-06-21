@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ExtensionModel>
-    <Runtime>
+<!--    <Runtime>
         <Import assembly = "Kusto.Data.dll"/>
         <Import assembly = "Microsoft.Identity.Client.dll"/>
         <Import assembly = "Kusto.Cloud.Platform.dll"/>
@@ -10,7 +10,7 @@
         <ScanExclude  path="Microsoft.Identity.Client.dll" />
         <ScanExclude  path="Kusto.Cloud.Platform.dll" />
         <ScanExclude  path="Kusto.Cloud.Platform.Aad.dll" />
-    </Runtime>
+    </Runtime>-->
 
     <Extension path="/MonoDevelop/Ide/StartupHandlers">
         <Class class="KustoExtensions.InitializeCommand"/>

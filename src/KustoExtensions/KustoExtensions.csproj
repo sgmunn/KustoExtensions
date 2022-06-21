@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <Reference Include="Microsoft.Azure.Kusto.Data">
-      <HintPath>..\..\libs\Microsoft.Azure.Kusto.Data.10.0.3\lib\netcoreapp2.1\Kusto.Data.dll</HintPath>
+      <HintPath>..\..\lib\merged\Kusto.Data.Merged.dll</HintPath>
     </Reference>
     <Reference Include="Kusto.Cloud.Platform">
       <HintPath>..\..\libs\Microsoft.Azure.Kusto.Cloud.Platform.10.0.3\lib\netcoreapp2.1\Kusto.Cloud.Platform.dll</HintPath>
@@ -23,8 +23,8 @@
     <Reference Include="Kusto.Cloud.Platform.Aad">
       <HintPath>..\..\libs\Microsoft.Azure.Kusto.Cloud.Platform.Aad.10.0.3\lib\netcoreapp2.1\Kusto.Cloud.Platform.Aad.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Identity.Client">
+<!--    <Reference Include="Microsoft.Identity.Client">
       <HintPath>..\..\libs\Microsoft.Identity.Client.4.37.0\lib\netcoreapp2.1\Microsoft.Identity.Client.dll</HintPath>
-    </Reference>
+    </Reference>-->
   </ItemGroup>
 </Project>
