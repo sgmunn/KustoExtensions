@@ -5,8 +5,6 @@ VisualStudioVersion = 25.0.1703.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KustoExtensions", "KustoExtensions\KustoExtensions.csproj", "{1751BB12-AF68-4F41-969C-1BD2A8F878C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KustoExplorer", "KustoExplorer\KustoExplorer.csproj", "{35078D32-207F-4579-B96C-7F4B44D693B2}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KustoExplorer.Core", "KustoExplorer.Core\KustoExplorer.Core.csproj", "{2DC17EDF-2DE3-47A9-AEB1-9B4F6C5A9CF8}"
 EndProject
 Global
@@ -19,10 +17,6 @@ Global
 		{1751BB12-AF68-4F41-969C-1BD2A8F878C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1751BB12-AF68-4F41-969C-1BD2A8F878C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1751BB12-AF68-4F41-969C-1BD2A8F878C8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{35078D32-207F-4579-B96C-7F4B44D693B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{35078D32-207F-4579-B96C-7F4B44D693B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{35078D32-207F-4579-B96C-7F4B44D693B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{35078D32-207F-4579-B96C-7F4B44D693B2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2DC17EDF-2DE3-47A9-AEB1-9B4F6C5A9CF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2DC17EDF-2DE3-47A9-AEB1-9B4F6C5A9CF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2DC17EDF-2DE3-47A9-AEB1-9B4F6C5A9CF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
