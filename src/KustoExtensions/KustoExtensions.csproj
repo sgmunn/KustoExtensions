@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\Kusto.props" />
+
   <PropertyGroup>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
@@ -8,9 +9,22 @@
   </PropertyGroup>
   <ItemGroup>
     <AddinReference Include="MonoDevelop.Core" />
+    <AddinReference Include="Xamarin.Ide.Identity" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudioMac.Sdk" Version="17.0.0" />
     <PackageReference Include="Microsoft.Azure.Kusto.Data" Version="10.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+      <AddinFile Include="/Users/gregm/.nuget/packages/microsoft.azure.kusto.data/10.0.3/lib/netcoreapp2.1/Kusto.Data.dll"></AddinFile>
+      <AddinFile Include="/Users/gregm/.nuget/packages/microsoft.azure.kusto.cloud.platform/10.0.3/lib/netcoreapp2.1/Kusto.Cloud.Platform.dll"></AddinFile>
+      <AddinFile Include="/Users/gregm/.nuget/packages/microsoft.azure.kusto.cloud.platform.aad/10.0.3/lib/netcoreapp2.1/Kusto.Cloud.Platform.Aad.dll"></AddinFile>
+      <AddinFile Include="/Users/gregm/.nuget/packages/microsoft.identity.client/4.37.0/lib/netcoreapp2.1/Microsoft.Identity.Client.dll"></AddinFile>
+      
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\KustoExplorer.Core\KustoExplorer.Core.csproj" />
   </ItemGroup>
 </Project>
