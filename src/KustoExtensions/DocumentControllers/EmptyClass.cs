@@ -57,6 +57,10 @@ namespace KustoExtensions
 
             this.textView = new NSTextView() { TranslatesAutoresizingMaskIntoConstraints = false };
 
+
+            //this.WantsLayer = true;
+            //this.Layer.BackgroundColor = NSColor.Red.CGColor;
+
             this.AddSubview(this.textView);
             this.textView.LeadingAnchor.ConstraintEqualTo(this.LeadingAnchor).Active = true;
             this.textView.TrailingAnchor.ConstraintEqualTo(this.TrailingAnchor).Active = true;
