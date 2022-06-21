@@ -1,0 +1,53 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- See https://github.com/xamarin/xamarin-macios/issues/13999. The fix for
+       that issue comes in workload 13.7, and works great for libe_sqlite3, but
+       corrupts the signature on others like libSystem.IO.Ports.Native.dylib,
+       which prevents running unsigned builds on ARM64.
+       This target allows us to selectively run install_name_tool on only the
+       dylibs we need fixed (sqlite).
+       In the future, we may want to start using adhoc signing for local builds
+       (and perhaps full signing for PR builds) and remove this workaround. -->
+  <!-- This must support exe projects in both main/ and setup/ -->
+  <Target
+    Name="DylibWorkaround"
+    AfterTargets="_ComputeDynamicLibrariesToReidentify"
+    BeforeTargets="_InstallNameTool"
+    Condition="'$(OutputType)' == 'exe'">
+    <ItemGroup>
+      <_DynamicLibraryToReidentify Remove="@(_DynamicLibraryToReidentify)" Condition="'%(_DynamicLibraryToReidentify.Filename)' != 'libSystem.Globalization.Native.dylib'" />
+    </ItemGroup>
+  </Target>
+
+  <PropertyGroup>
+    <LangVersion>Latest</LangVersion>
+    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+    <Configuration Condition="$(Configuration) == ''">Debug</Configuration>
+    <PlatformTarget Condition="$(PlatformTarget) == ''">AnyCPU</PlatformTarget>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net6.0-macos</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <RuntimeIdentifiers>osx-arm64</RuntimeIdentifiers>
+    <UseMonoRuntime>false</UseMonoRuntime>
+    <LinkMode>None</LinkMode>
+
+    <SupportedOSPlatformVersion>10.14</SupportedOSPlatformVersion>
+    <MonoMacResourcePrefix>Resources</MonoMacResourcePrefix>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <EnableCodeSigning>false</EnableCodeSigning>
+    <UseSGen>false</UseSGen>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <EnableCodeSigning>false</EnableCodeSigning>
+    <UseSGen>false</UseSGen>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\KustoExplorer.Core\KustoExplorer.Core.csproj" />
+  </ItemGroup>
+</Project>
+
