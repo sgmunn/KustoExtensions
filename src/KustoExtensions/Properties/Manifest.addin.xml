@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExtensionModel>
+    <Runtime>
+        <Import assembly = "Kusto.Data.dll"/>
+    </Runtime>
+
+    <Extension path="/MonoDevelop/Ide/StartupHandlers">
+        <Class class="KustoExtensions.InitializeCommand"/>
+    </Extension>
+
+    <Extension path="/MonoDevelop/Core/MimeTypes">
+        <MimeType id="text/kusto-x-json" _description="Kusto Notebook" baseType="text/x-json">
+            <File pattern="*.knb"/>
+        </MimeType>
+        <MimeType id="text/x-kusto" _description="Kusto Query">
+            <File pattern="*.kql"/>
+        </MimeType>
+    </Extension>
+
+
+</ExtensionModel>
