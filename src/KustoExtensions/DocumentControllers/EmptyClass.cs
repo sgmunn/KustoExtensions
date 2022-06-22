@@ -25,11 +25,11 @@ namespace KustoExtensions
         {
             var scrollView = new NSScrollView()
             {
-                TranslatesAutoresizingMaskIntoConstraints = false,
+                //TranslatesAutoresizingMaskIntoConstraints = false,
                 HasVerticalScroller = true,
                 HasHorizontalScroller = true,
                 DrawsBackground = false,
-                BorderType = NSBorderType.NoBorder
+                BorderType = NSBorderType.GrooveBorder
             };
             View = scrollView;
             // todo: we want this to be an editor
@@ -78,7 +78,7 @@ namespace KustoExtensions
         public static void AttachViewHorizontally(this NSView parent, NSView view, int margins = 0)
         {
             view.LeadingAnchor.ConstraintLessThanOrEqualTo(parent.LeadingAnchor, margins).Active = true;
-            view.TrailingAnchor.ConstraintLessThanOrEqualTo(parent.TrailingAnchor, -margins).Active = true;
+            view.TrailingAnchor.ConstraintEqualTo(parent.TrailingAnchor, -margins).Active = true;
         }
 
         public static void CreateFlexibleSpace(this NSStackView view)
@@ -87,11 +87,49 @@ namespace KustoExtensions
         }
     }
 
-    class QueryAndResultsViewController : NSViewController
+    class QueryAndResultsViewController : NSSplitViewController
     {
         private QueryViewController queryViewController;
         private ResultsViewViewController resultsViewController;
-        private NSSplitView splitView;
+
+        public QueryAndResultsViewController()
+        {
+            this.View.TranslatesAutoresizingMaskIntoConstraints = false;
+            this.queryViewController = new QueryViewController();
+            this.resultsViewController = new ResultsViewViewController();
+
+            var item = new NSSplitViewItem() { MinimumThickness = 50 };
+            item.ViewController = this.queryViewController;
+
+            this.AddSplitViewItem(item);
+
+            item = new NSSplitViewItem() {  MinimumThickness = 50};
+            item.ViewController = this.resultsViewController;
+            this.AddSplitViewItem(item);
+
+            this.queryViewController.SetText("Q");
+            this.resultsViewController.SetText("R");
+        }
+
+        internal string GetQueryScript()
+        {
+            return this.queryViewController.GetQueryScript();
+        }
+
+        internal void SetQueryText(string text)
+        {
+            this.queryViewController.SetText(text);
+        }
+
+        internal void SetResultsText(string text)
+        {
+            this.resultsViewController.SetText(text);
+        }
+    }
+
+    class KustoViewController : NSViewController
+    {
+        private QueryAndResultsViewController queryAndResultsViewController;
         private NSStackView toolbar;
         private NSButton runButton;
 
@@ -107,10 +145,11 @@ namespace KustoExtensions
             };
         }
 
-        public QueryAndResultsViewController()
+        public KustoViewController()
         {
             var stackView = new NSStackView()
             {
+                TranslatesAutoresizingMaskIntoConstraints = false,
                 Orientation = NSUserInterfaceLayoutOrientation.Vertical,
                 Alignment = NSLayoutAttribute.Leading,
                 Distribution = NSStackViewDistribution.Fill
@@ -128,16 +167,8 @@ namespace KustoExtensions
             this.toolbar.AddArrangedSubview(runButton);
             toolbar.CreateFlexibleSpace(); //creates an flexible area to don't force other views to grow
 
-            //splitview
-            this.queryViewController = new QueryViewController();
-            this.resultsViewController = new ResultsViewViewController();
-            this.splitView = new() { TranslatesAutoresizingMaskIntoConstraints = false, IsVertical = true };
-            stackView.AddArrangedSubviewAndAttachHorizontally(splitView);
-
-
-            // todo: arrange these better by default
-            this.splitView.AddArrangedSubview(this.queryViewController.View);
-            this.splitView.AddArrangedSubview(this.resultsViewController.View);
+            this.queryAndResultsViewController = new QueryAndResultsViewController();
+            stackView.AddArrangedSubviewAndAttachHorizontally(queryAndResultsViewController.View);
         }
 
         public override void ViewWillAppear()
@@ -148,8 +179,6 @@ namespace KustoExtensions
 
             this.View.NeedsLayout = true;
             this.View.NeedsDisplay = true;
-
-            splitView.SetPositionOfDivider(View.Frame.Width * .5f, 1);
         }
 
         public override void ViewWillDisappear()
@@ -162,18 +191,18 @@ namespace KustoExtensions
         {
             // run the script
             var x = new KustoTest();
-            var y = x.GetTest(this.queryViewController.GetQueryScript());
+            var y = x.GetTest(this.queryAndResultsViewController.GetQueryScript());
             this.SetResultText(y);
         }
 
         public void SetQueryText(string text)
         {
-            this.queryViewController.SetText(text);
+            this.queryAndResultsViewController.SetQueryText(text);
         }
 
         public void SetResultText(string text)
         {
-            this.resultsViewController.SetText(text);
+            this.queryAndResultsViewController.SetResultsText(text);
         }
     }
 
@@ -185,11 +214,11 @@ namespace KustoExtensions
         InsertBefore = "DefaultDisplayBinding")]
     class KustoQueryFileDocumentController : FileDocumentController//, IOutlinedDocument, IPropertyPadProvider
     {
-        private QueryAndResultsViewController contentViewController;
+        private KustoViewController contentViewController;
         private FilePath filePath;
         public KustoQueryFileDocumentController()
         {
-            contentViewController = new QueryAndResultsViewController();
+            contentViewController = new KustoViewController();
         }
 
         protected override Task OnSave()
@@ -211,7 +240,7 @@ namespace KustoExtensions
 
         private void OnDocumentOpened(object sender, DocumentEventArgs e)
         {
-            this.contentViewController.SetQueryText(File.ReadAllText(this.FilePath));
+             this.contentViewController.SetQueryText(File.ReadAllText(this.FilePath));
         }
 
         protected override Control OnGetViewControl(DocumentViewContent view)
