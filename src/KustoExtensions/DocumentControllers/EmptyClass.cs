@@ -17,28 +17,48 @@ using ObjCRuntime;
 
 namespace KustoExtensions
 {
-    class QueryView : NSView
+    class TextViewController : NSViewController
     {
-        private NSTextView textView;
+        protected NSTextView textView;
 
-        public QueryView()
+        public TextViewController()
         {
+            var scrollView = new NSScrollView()
+            {
+                TranslatesAutoresizingMaskIntoConstraints = false,
+                HasVerticalScroller = true,
+                HasHorizontalScroller = true,
+                DrawsBackground = false,
+                BorderType = NSBorderType.NoBorder
+            };
+            View = scrollView;
             // todo: we want this to be an editor
-            this.textView = new NSTextView() { TranslatesAutoresizingMaskIntoConstraints = false };
-            this.AddSubview(this.textView);
+            this.textView = new NSTextView() { Frame = scrollView.Bounds };
+            scrollView.DocumentView = textView;
 
-            textView.TextStorage.SetString(new NSAttributedString("Hellow orls"));
-        }
+            textView.AutoresizingMask = NSViewResizingMask.WidthSizable | NSViewResizingMask.HeightSizable;
+            textView.TextContainer.Size = new CoreGraphics.CGSize(scrollView.ContentSize.Width, float.MaxValue);
+            textView.Font = NSFont.SystemFontOfSize(NSFont.SystemFontSize);
 
-        public override void SetFrameSize(CGSize newSize)
-        {
-            base.SetFrameSize(newSize);
-            this.textView.Frame = this.Bounds;
         }
 
         public void SetText(string text)
         {
             textView.TextStorage.SetString(new NSAttributedString(text));
+        }
+    }
+
+    class ResultsViewViewController : TextViewController
+    {
+        public ResultsViewViewController()
+        {
+        }
+    }
+
+    class QueryViewController : TextViewController
+    {
+        public QueryViewController()
+        {
         }
 
         internal string GetQueryScript()
@@ -47,99 +67,115 @@ namespace KustoExtensions
         }
     }
 
-    class ResultsView : NSView
+    static class NSViewExtensions
     {
-        private NSTextView textView;
-
-        public ResultsView()
+        public static void AddArrangedSubviewAndAttachHorizontally(this NSStackView parent, NSView view, int margins = 0)
         {
-            this.TranslatesAutoresizingMaskIntoConstraints = false;
-
-            this.textView = new NSTextView() { TranslatesAutoresizingMaskIntoConstraints = false };
-
-
-            //this.WantsLayer = true;
-            //this.Layer.BackgroundColor = NSColor.Red.CGColor;
-
-            this.AddSubview(this.textView);
-            this.textView.LeadingAnchor.ConstraintEqualTo(this.LeadingAnchor).Active = true;
-            this.textView.TrailingAnchor.ConstraintEqualTo(this.TrailingAnchor).Active = true;
-            this.textView.TopAnchor.ConstraintEqualTo(this.TopAnchor).Active = true;
-            this.textView.BottomAnchor.ConstraintEqualTo(this.BottomAnchor).Active = true;
+            parent.AddArrangedSubview(view);
+            AttachViewHorizontally(parent, view, margins);
         }
 
-        public void SetText(string text)
+        public static void AttachViewHorizontally(this NSView parent, NSView view, int margins = 0)
         {
-            textView.TextStorage.SetString(new NSAttributedString(text));
+            view.LeadingAnchor.ConstraintLessThanOrEqualTo(parent.LeadingAnchor, margins).Active = true;
+            view.TrailingAnchor.ConstraintLessThanOrEqualTo(parent.TrailingAnchor, -margins).Active = true;
+        }
+
+        public static void CreateFlexibleSpace(this NSStackView view)
+        {
+            view.AddArrangedSubview(new NSView() { TranslatesAutoresizingMaskIntoConstraints = false });
         }
     }
 
-    class QueryAndResultsView : NSSplitView
+    class QueryAndResultsViewController : NSViewController
     {
-        private QueryView queryView;
-        private ResultsView resultsView;
+        private QueryViewController queryViewController;
+        private ResultsViewViewController resultsViewController;
         private NSSplitView splitView;
-        private NSView toolbar;
+        private NSStackView toolbar;
         private NSButton runButton;
 
-        public QueryAndResultsView()
+        NSStackView CreateHorizontalStackView(int spacing = 10)
         {
-            this.TranslatesAutoresizingMaskIntoConstraints = false;
+            return new NSStackView()
+            {
+                TranslatesAutoresizingMaskIntoConstraints = false,
+                Orientation = NSUserInterfaceLayoutOrientation.Horizontal,
+                Distribution = NSStackViewDistribution.Fill,
+                Alignment = NSLayoutAttribute.CenterY,
+                Spacing = spacing,
+            };
+        }
 
-            this.queryView = new QueryView();
-            this.resultsView = new ResultsView();
-            this.splitView = new NSSplitView() { TranslatesAutoresizingMaskIntoConstraints = false };
-            this.toolbar = new NSView() { TranslatesAutoresizingMaskIntoConstraints = false };
-            this.runButton = new NSButton() { TranslatesAutoresizingMaskIntoConstraints = false, BezelStyle = NSBezelStyle.Circular };
+        public QueryAndResultsViewController()
+        {
+            var stackView = new NSStackView()
+            {
+                Orientation = NSUserInterfaceLayoutOrientation.Vertical,
+                Alignment = NSLayoutAttribute.Leading,
+                Distribution = NSStackViewDistribution.Fill
+            };
+            View = stackView;
+            stackView.EdgeInsets = new NSEdgeInsets(10, 10, 0, 10);
 
+            //toolbar
+            this.toolbar = CreateHorizontalStackView();
+            //toolbar.WantsLayer = true;
+            //toolbar.Layer.BackgroundColor = NSColor.Blue.CGColor;
+            stackView.AddArrangedSubviewAndAttachHorizontally(toolbar, 10);
+
+            this.runButton = new NSButton() { TranslatesAutoresizingMaskIntoConstraints = false, BezelStyle = NSBezelStyle.RoundRect, Title = "Query" };
+            this.toolbar.AddArrangedSubview(runButton);
+            toolbar.CreateFlexibleSpace(); //creates an flexible area to don't force other views to grow
+
+            //splitview
+            this.queryViewController = new QueryViewController();
+            this.resultsViewController = new ResultsViewViewController();
+            this.splitView = new() { TranslatesAutoresizingMaskIntoConstraints = false, IsVertical = true };
+            stackView.AddArrangedSubviewAndAttachHorizontally(splitView);
+
+
+            // todo: arrange these better by default
+            this.splitView.AddArrangedSubview(this.queryViewController.View);
+            this.splitView.AddArrangedSubview(this.resultsViewController.View);
+        }
+
+        public override void ViewWillAppear()
+        {
+            base.ViewWillAppear();
             // todo: selector
             this.runButton.Activated += RunButton_Activated;
 
-            // todo: arrange these better by default
-            this.splitView.AddArrangedSubview(this.queryView);
-            this.splitView.AddArrangedSubview(this.resultsView);
+            this.View.NeedsLayout = true;
+            this.View.NeedsDisplay = true;
 
-            this.AddSubview(this.toolbar);
-            this.toolbar.LeadingAnchor.ConstraintEqualTo(this.LeadingAnchor).Active = true;
-            this.toolbar.TrailingAnchor.ConstraintEqualTo(this.TrailingAnchor).Active = true;
-            this.toolbar.TopAnchor.ConstraintEqualTo(this.TopAnchor).Active = true;
-            this.toolbar.HeightAnchor.ConstraintEqualTo(30).Active = true;
+            splitView.SetPositionOfDivider(View.Frame.Width * .5f, 1);
+        }
 
-            this.toolbar.AddSubview(this.runButton);
-            this.runButton.LeadingAnchor.ConstraintEqualTo(this.toolbar.LeadingAnchor, 4).Active = true;
-            this.runButton.WidthAnchor.ConstraintEqualTo(26).Active = true;
-            this.runButton.TopAnchor.ConstraintEqualTo(this.toolbar.TopAnchor, 2).Active = true;
-            this.runButton.HeightAnchor.ConstraintEqualTo(26).Active = true;
-
-            this.AddSubview(this.splitView);
-            this.splitView.LeadingAnchor.ConstraintEqualTo(this.LeadingAnchor).Active = true;
-            this.splitView.TrailingAnchor.ConstraintEqualTo(this.TrailingAnchor).Active = true;
-            this.splitView.TopAnchor.ConstraintEqualTo(this.toolbar.BottomAnchor).Active = true;
-            this.splitView.BottomAnchor.ConstraintEqualTo(this.BottomAnchor).Active = true;
+        public override void ViewWillDisappear()
+        {
+            base.ViewWillDisappear();
+            this.runButton.Activated -= RunButton_Activated;
         }
 
         private void RunButton_Activated(object sender, EventArgs e)
         {
             // run the script
             var x = new KustoTest();
-            var y = x.GetTest(this.queryView.GetQueryScript());
+            var y = x.GetTest(this.queryViewController.GetQueryScript());
             this.SetResultText(y);
-
         }
 
         public void SetQueryText(string text)
         {
-            this.queryView.SetText(text);
+            this.queryViewController.SetText(text);
         }
 
         public void SetResultText(string text)
         {
-            this.resultsView.SetText(text);
+            this.resultsViewController.SetText(text);
         }
-
     }
-
-
 
     [ExportFileDocumentController(
         Id = "KustoQuery",
@@ -149,18 +185,11 @@ namespace KustoExtensions
         InsertBefore = "DefaultDisplayBinding")]
     class KustoQueryFileDocumentController : FileDocumentController//, IOutlinedDocument, IPropertyPadProvider
     {
-        private QueryAndResultsView contentView;
+        private QueryAndResultsViewController contentViewController;
         private FilePath filePath;
-
-
         public KustoQueryFileDocumentController()
         {
-            contentView = new QueryAndResultsView();
-            contentView.TranslatesAutoresizingMaskIntoConstraints = false;
-        }
-
-        async void PropertyPad_Changed(object sender, EventArgs e)
-        {
+            contentViewController = new QueryAndResultsViewController();
         }
 
         protected override Task OnSave()
@@ -173,215 +202,26 @@ namespace KustoExtensions
             if (!(modelDescriptor is FileDescriptor fileDescriptor))
                 throw new InvalidOperationException();
 
-            //if (session == null)
-            //{
-            //    Owner = fileDescriptor.Owner;
-            //    filePath = fileDescriptor.FilePath;
-            //    DocumentTitle = fileDescriptor.FilePath.FileName;
+            IdeApp.Workbench.DocumentOpened += OnDocumentOpened;
 
-            //    figmaDelegate = new FigmaDesignerDelegate();
-
-            //    var localPath = Path.Combine(filePath.ParentDirectory.FullPath, FigmaBundle.ResourcesDirectoryName);
-
-            //    fileProvider = new ControlFileNodeProvider(localPath) { File = filePath.FullPath };
-            //    rendererService = new ControlViewRenderingService(fileProvider);
-
-            //    //we generate a new file provider for embeded windows
-            //    var tmpRemoteProvider = new FileNodeProvider(localPath) { File = filePath.FullPath };
-            //    rendererService.CustomConverters.Add(new EmbededWindowConverter(tmpRemoteProvider) { LiveButtonAlwaysVisible = false });
-            //    rendererService.CustomConverters.Add(new EmbededSheetDialogConverter(tmpRemoteProvider));
-
-            //    layoutManager = new StoryboardLayoutManager();
-            //    session = new FigmaDesignerSession(fileProvider, rendererService, layoutManager);
-            //    //session.ModifiedChanged += HandleModifiedChanged;
-            //    session.ReloadFinished += Session_ReloadFinished;
-
-            //    surface = new FigmaDesignerSurface(figmaDelegate, session)
-            //    {
-            //        Session = session
-            //    };
-
-            //    surface.FocusedViewChanged += Surface_FocusedViewChanged;
-
-            //    var window = NSApplication.SharedApplication.MainWindow;
-            //    surface.SetWindow(new WindowInternalWrapper(window));
-            //    surface.StartHoverSelection();
-
-            //    //IdeApp.Workbench.ActiveDocumentChanged += OnActiveDocumentChanged;
-                IdeApp.Workbench.DocumentOpened += OnDocumentOpened;
-            //}
-            //await RefreshAll();
             await base.OnInitialize(modelDescriptor, status);
         }
 
-        //void Surface_FocusedViewChanged(object sender, IView e)
-        //{
-        //    var model = session.GetModel(e);
-        //    if (model == null)
-        //    {
-        //        return;
-        //    }
-
-        //    if (outlinePad != null)
-        //    {
-        //        outlinePad.Focus(model);
-        //    }
-        //    //var currentWrapper = GetWrapper (model);
-
-        //    DesignerSupport.DesignerSupport.Service.PropertyPad?.SetCurrentObject(model, new object[] { model });
-        //    //PropertyPad.Instance.Control.CurrentObject = GetWrapper(model);
-        //}
-
-        //void Session_ReloadFinished(object sender, EventArgs e)
-        //{
-        //}
+        CancellationTokenSource cancellationTokenSource;
 
         private void OnDocumentOpened(object sender, DocumentEventArgs e)
         {
-            //            UpdateLayout();
-            this.contentView.NeedsLayout = true;
-            this.contentView.NeedsDisplay = true;
+            this.contentViewController.SetQueryText(File.ReadAllText(this.FilePath));
         }
 
-        //protected override Control OnGetViewControl(DocumentViewContent view)
-        //{
-        //}
-
-        protected async override Task<Control> OnGetViewControlAsync(CancellationToken token, DocumentViewContent view)
+        protected override Control OnGetViewControl(DocumentViewContent view)
         {
-            // todo: I would have thought the document controller did this?
-            this.contentView.SetQueryText(await File.ReadAllTextAsync(this.FilePath, token));
-
-            return contentView;
+            return contentViewController.View;
         }
-
-        //private void OnActiveDocumentChanged(object sender, EventArgs e)
-        //{
-        //    UpdateLayout();
-        //}
-
-        //string lastLayout;
-        //private void UpdateLayout()
-        //{
-        //    var current = IdeApp.Workbench.ActiveDocument?.GetContent<string>();
-        //    if (current == null)
-        //    {
-        //        if (lastLayout != null && IdeApp.Workbench.CurrentLayout == "Visual Design")
-        //            IdeApp.Workbench.CurrentLayout = lastLayout;
-        //        lastLayout = null;
-        //    }
-        //    else
-        //    {
-        //        if (IdeApp.Workbench.CurrentLayout != "Visual Design")
-        //        {
-        //            if (lastLayout == null)
-        //            {
-        //                lastLayout = IdeApp.Workbench.CurrentLayout;
-        //                IdeApp.Workbench.CurrentLayout = "Visual Design";
-        //            }
-        //        }
-        //        //current.widget.SetFocus();
-        //    }
-        //}
-
-        //#region IOutlinedDocument
-
-        //public Widget GetOutlineWidget()
-        //{
-        //    outlinePad = FigmaDesignerOutlinePad.Instance;
-        //    outlinePad.GenerateTree(session.Response.document, figmaDelegate);
-
-        //    outlinePad.RaiseFirstResponder += OutlinePad_RaiseFirstResponder;
-        //    outlinePad.RaiseDeleteItem += OutlinePad_RaiseDeleteItem;
-        //    return outlinePad;
-        //}
-
-        //async void OutlinePad_RaiseDeleteItem(object sender, FigmaNode e)
-        //{
-        //    HasUnsavedChanges = true;
-        //    session.DeleteView(e);
-        //    await RefreshAll();
-        //}
-
-        //ViewRenderServiceOptions fileOptions = new ViewRenderServiceOptions();
-
-        //async Task RefreshAll()
-        //{
-        //    await session.ReloadAsync(scrollview.ContentView, filePath, fileOptions);
-        //    if (outlinePad != null)
-        //    {
-        //        outlinePad.GenerateTree(session.Response.document, figmaDelegate);
-        //        outlinePad.Focus(GetCurrentSelectedNode());
-        //    }
-        //}
-
-        //FigmaNode GetCurrentSelectedNode()
-        //{
-        //    var selectedView = surface.SelectedView;
-        //    var selectedModel = session.GetModel(selectedView);
-        //    return selectedModel;
-        //}
-
-        //void OutlinePad_RaiseFirstResponder(object sender, FigmaNode e)
-        //{
-        //    var view = session.GetViewWrapper(e);
-        //    surface.ChangeFocusedView(view);
-        //}
-
-        //public IEnumerable<Widget> GetToolbarWidgets()
-        //{
-        //    yield break;
-        //}
-
-        //public void ReleaseOutlineWidget()
-        //{
-        //    // throw new NotImplementedException();
-        //}
-
-        //#endregion
-
-        ////#region ICustomPropertyPadProvider
-
-        ////PropertyContentPad propertyPad;
-
-        ////public Widget GetCustomPropertyWidget()
-        ////{
-        ////    PropertyPad.Initialize(session);
-        ////    propertyPad = PropertyPad.Instance;
-        ////    return propertyPad.Control;
-        ////}
-
-        ////public void DisposeCustomPropertyWidget()
-        ////{
-        ////    //throw new NotImplementedException();
-        ////}
-
-        ////#endregion
 
         protected override void OnDispose()
         {
-//            surface.StopHover();
             base.OnDispose();
         }
-
-        //public object GetActiveComponent()
-        //{
-        //    return GetCurrentSelectedNode();
-        //}
-
-        //public object GetProvider()
-        //{
-        //    return GetCurrentSelectedNode();
-        //}
-
-        //public void OnEndEditing(object obj)
-        //{
-
-        //}
-
-        //public void OnChanged(object obj)
-        //{
-
-        //}
     }
 }
