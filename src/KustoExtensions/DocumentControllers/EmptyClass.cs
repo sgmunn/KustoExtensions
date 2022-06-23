@@ -192,7 +192,7 @@ namespace KustoExtensions
             // run the script
             var x = new KustoTest();
             var y = x.GetTest(this.queryAndResultsViewController.GetQueryScript());
-            this.SetResultText(y);
+            this.SetResultText(y.Fields[0].Name);
         }
 
         public void SetQueryText(string text)
