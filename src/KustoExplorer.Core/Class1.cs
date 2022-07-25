@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Security.Cryptography;
+using System.Threading;
 using Kusto.Data.Net.Client;
 
 namespace KustoExplorer.Core

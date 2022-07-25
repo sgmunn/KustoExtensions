@@ -6,8 +6,14 @@
 
   <ItemGroup>
     <None Remove="Microsoft.Azure.Kusto.Data" />
+    <None Remove="Newtonsoft.Json" />
+    <None Remove="QueryBuilder\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.Kusto.Data" Version="10.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="QueryBuilder\" />
   </ItemGroup>
 </Project>

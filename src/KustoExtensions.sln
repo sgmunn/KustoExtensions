@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KustoExtensions", "KustoExt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KustoExplorer.Core", "KustoExplorer.Core\KustoExplorer.Core.csproj", "{2DC17EDF-2DE3-47A9-AEB1-9B4F6C5A9CF8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ktool", "ktool\ktool.csproj", "{F696414D-E3A7-4C61-BF60-350230006A23}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{2DC17EDF-2DE3-47A9-AEB1-9B4F6C5A9CF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2DC17EDF-2DE3-47A9-AEB1-9B4F6C5A9CF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2DC17EDF-2DE3-47A9-AEB1-9B4F6C5A9CF8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F696414D-E3A7-4C61-BF60-350230006A23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F696414D-E3A7-4C61-BF60-350230006A23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F696414D-E3A7-4C61-BF60-350230006A23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F696414D-E3A7-4C61-BF60-350230006A23}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
